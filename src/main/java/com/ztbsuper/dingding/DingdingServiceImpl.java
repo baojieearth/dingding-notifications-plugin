@@ -71,13 +71,21 @@ public class DingdingServiceImpl implements DingdingService {
         }
     }
 
+    private String getPackageUrl() {
+        if (jenkinsURL.endsWith("/")) {
+            return jenkinsURL + "job/" + build.getProject().getDisplayName() + "/ws/package";
+        } else {
+            return jenkinsURL + "/job/" + build.getProject().getDisplayName() + "/ws/package";
+        }
+    }
+
     @Override
     public void success() {
         String pic = "http://icons.iconarchive.com/icons/paomedia/small-n-flat/1024/sign-check-icon.png";
         String title = String.format("%s%s构建成功", build.getProject().getDisplayName(), build.getDisplayName());
         String content = String.format("项目[%s%s]构建成功, summary:%s, duration:%s", build.getProject().getDisplayName(), build.getDisplayName(), build.getBuildStatusSummary().message, build.getDurationString());
 
-        String link = getBuildUrl();
+        String link = getPackageUrl();
         logger.info(link);
         if (onSuccess) {
             logger.info("send link msg from " + listener.toString());
