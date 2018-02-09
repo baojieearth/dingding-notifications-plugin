@@ -7,7 +7,8 @@ import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.tasks.Publisher;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import java.util.Map;
 @Extension
 public class JobListener extends RunListener<AbstractBuild> {
 
+    private Logger logger = LoggerFactory.getLogger(JobListener.class);
 
     public JobListener() {
         super(AbstractBuild.class);
@@ -24,16 +26,24 @@ public class JobListener extends RunListener<AbstractBuild> {
 
     @Override
     public void onStarted(AbstractBuild r, TaskListener listener) {
-        getService(r, listener).start();
+        try {
+            getService(r, listener).start();
+        } catch (Exception e) {
+            logger.error("ignore error");
+        }
     }
 
     @Override
     public void onCompleted(AbstractBuild r, @Nonnull TaskListener listener) {
-        Result result = r.getResult();
-        if (null != result && result.equals(Result.SUCCESS)) {
-            getService(r, listener).success();
-        } else {
-            getService(r, listener).failed();
+        try {
+            Result result = r.getResult();
+            if (null != result && result.equals(Result.SUCCESS)) {
+                getService(r, listener).success();
+            } else {
+                getService(r, listener).failed();
+            }
+        } catch (Exception e) {
+            logger.error("ignore error");
         }
     }
 
